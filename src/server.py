@@ -18,8 +18,8 @@ def run_server(host='127.0.0.1', port=8080):
             print(f'Connected by {client_addr}')
             # リクエストデータを受信（今回はシンプルに 1024 バイト）
             request = client_conn.recv(1024)
-            print("Request received:")
-            print(request.decode('utf-8', errors='replace'))
+            decoded_request = request.decode('utf-8', errors='replace')
+            print(f"{decoded_request}")
             
             # HTTP レスポンスの組み立て
             body = "Hello World"
