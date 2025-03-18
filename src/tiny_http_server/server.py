@@ -61,5 +61,11 @@ def parse_request(request: bytes):
     pprint.pprint(result)
 
 
+class HttpServer:
+    def __init__(self, ip, port):
+        self.ip_address = ip
+        self.port = port
+
+
 if __name__ == "__main__":
     run_server()
