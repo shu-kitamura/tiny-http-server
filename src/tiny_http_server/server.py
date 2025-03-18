@@ -34,38 +34,50 @@ def run_server(host="127.0.0.1", port=8080):
             # レスポンスを送信
             client_conn.sendall(response.encode("utf-8"))
 
+def parse_request(request: str) -> dict:
+    """
+    生の HTTP リクエスト文字列をパースし、以下のキーを持つ辞書を返します:
+      - method: HTTP メソッド
+      - path: リクエストのパス
+      - version: HTTP バージョン
+      - headers: ヘッダーの辞書（各ヘッダーは "Key: Value" 形式でパース）
+      - body: ボディ文字列
+    """
+    # 行ごとに分割 (このテストでは "\n" 区切り)
+    lines = request.splitlines()
+    if not lines:
+        raise ValueError("Empty request")
 
-def parse_request(request: bytes):
-    # parse HTTP request
-    result = {
-        "request_line": {"method": "", "path": "", "protocol": ""},
-        "headers": {},
-        "body": "",
+    # 1行目はリクエストライン
+    request_line = lines[0]
+    parts = request_line.split()
+    if len(parts) < 3:
+        raise ValueError("Invalid request line")
+    method, path, version = parts[0], parts[1], parts[2]
+
+    # ヘッダー部分のパース (空行に到達するまで)
+    headers = {}
+    i = 1
+    while i < len(lines) and lines[i].strip() != "":
+        line = lines[i]
+        # ヘッダー行は "Key: Value" 形式であることを期待
+        if ":" not in line:
+            raise ValueError(f"Invalid header line: {line}")
+        key, value = line.split(":", 1)
+        headers[key.strip()] = value.strip()
+        i += 1
+
+    # 空行以降はボディ (存在する場合)
+    i += 1  # 空行をスキップ
+    body = "\n".join(lines[i:]) if i < len(lines) else ""
+
+    return {
+        "method": method,
+        "path": path,
+        "version": version,
+        "headers": headers,
+        "body": body,
     }
-    decoded_request = request.decode("utf-8")
-    splited_request = decoded_request.split("\r\n")
-    request_line = splited_request[0].split(" ")
-    if len(request_line) == 3:
-        result["request_line"]["method"] = request_line[0]
-        result["request_line"]["path"] = request_line[1]
-        result["request_line"]["protocol"] = request_line[2]
-    else:
-        print("Invalid Request")
-
-    for header in splited_request[1:]:
-        if header == "":
-            break
-        key, value = header.split(": ")
-        result["headers"][key] = value
-
-    pprint.pprint(result)
-
-
-class HttpServer:
-    def __init__(self, ip, port):
-        self.ip_address = ip
-        self.port = port
-
 
 if __name__ == "__main__":
     run_server()
