@@ -20,7 +20,7 @@ def run_server(host="127.0.0.1", port=8080):
             print(f"Connected by {client_addr}")
             # リクエストデータを受信（今回はシンプルに 1024 バイト）
             request = client_conn.recv(1024)
-            parse_request(request)
+            req = parse_request(request)
 
             # HTTP レスポンスの組み立て
             body = "Hello World"
